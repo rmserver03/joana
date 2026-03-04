@@ -1,0 +1,59 @@
+# Binários
+joana_lite
+joana_lite_test
+joana_completa_test
+*.exe
+*.out
+*.so
+*.dll
+
+# Dados e logs
+data/
+logs/
+*.log
+*.sqlite
+*.db
+
+# Configurações sensíveis
+config/*.yaml
+config/*.json
+*.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+credentials.json
+token.json
+
+# Diretórios do sistema
+.DS_Store
+Thumbs.db
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build artifacts
+dist/
+build/
+out/
+target/
+
+# Test coverage
+coverage.txt
+coverage.html
+coverage/
+
+# Go
+vendor/
+go.sum
