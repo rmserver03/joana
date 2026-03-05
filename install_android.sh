@@ -304,6 +304,7 @@ Problemas? Abra uma issue no GitHub ou contate via Telegram.
 ```
 
     log_success "README Android criado."
+EOF
 }
 
 # Testar instalação

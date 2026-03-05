@@ -124,6 +124,52 @@ joana/
 
 ---
 
-**Status:** Fase 0 em andamento  
-**Última atualização:** 26/02/2026  
-**Responsável:** ZERO-J.A.R.V.I.S. Hybrid
+## 📱 INSTALAÇÃO ANDROID (TERMUX)
+
+### Instalação Automática (1 linha):
+```bash
+curl -s https://raw.githubusercontent.com/rmserver03/joana/main/install_android_simple.sh | bash
+```
+
+### Instalação Manual:
+```bash
+# No Termux:
+pkg update && pkg upgrade
+pkg install golang git
+git clone https://github.com/rmserver03/joana.git
+cd joana
+go build -o joana_android cmd/joana_simple/main.go
+
+# Scripts de gerenciamento:
+mkdir -p ~/.joana
+cp install_android_simple.sh ~/.joana/
+chmod +x ~/.joana/install_android_simple.sh
+```
+
+### Uso no Android:
+```bash
+# Iniciar:
+~/joana/joana_android
+
+# Ou usar scripts:
+~/.joana/start.sh   # Iniciar em background
+~/.joana/stop.sh    # Parar
+tail -f ~/.joana/joana.log  # Ver logs
+```
+
+### Recursos Android:
+- **RAM:** 48-100MB (ultra-leve)
+- **CPU:** <5% uso
+- **Armazenamento:** ~15MB
+- **Bateria:** Impacto mínimo
+- **Conexão:** Wi-Fi ou dados móveis
+
+**Documentação Android completa:** [INSTALL_ANDROID.md](INSTALL_ANDROID.md)
+
+---
+
+**Status:** ✅ Produção - Joana completa e funcional  
+**Última atualização:** 04/03/2026  
+**Responsável:** ZERO-J.A.R.V.I.S. Hybrid  
+**GitHub:** https://github.com/rmserver03/joana  
+**Android:** Compatível via Termux

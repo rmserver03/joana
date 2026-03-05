@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -17,7 +18,8 @@ type SheetsIntegration struct {
 // NewSheetsIntegration cria uma nova integração com Google Sheets
 func NewSheetsIntegration(spreadsheetID string) *SheetsIntegration {
 	// Verificar se temos as credenciais necessárias
-	tokenPath := os.ExpandUser("~/zero/token.json")
+	homeDir, _ := os.UserHomeDir()
+	tokenPath := filepath.Join(homeDir, "zero", "token.json")
 	_, tokenErr := os.Stat(tokenPath)
 	
 	enabled := tokenErr == nil && spreadsheetID != ""
