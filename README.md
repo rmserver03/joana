@@ -104,7 +104,7 @@ joana/
 └── README.md            # Este arquivo
 ```
 
-## 🔒 SEGURANÇA (Herança ZERO-J.A.R.V.I.S.)
+## 🔒 SEGURANÇA (Herança ZERO-Cognitive Engine)
 - Fonte única de comandos (apenas Rafael autorizado)
 - Sanitização de entradas externas
 - Auditoria de todas as ações
@@ -170,6 +170,6 @@ tail -f ~/.joana/joana.log  # Ver logs
 
 **Status:** ✅ Produção - Joana completa e funcional  
 **Última atualização:** 04/03/2026  
-**Responsável:** ZERO-J.A.R.V.I.S. Hybrid  
+**Responsável:** ZERO-Cognitive Engine Hybrid  
 **GitHub:** https://github.com/rmserver03/joana  
 **Android:** Compatível via Termux

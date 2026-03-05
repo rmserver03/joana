@@ -78,11 +78,11 @@
 3. **PicoClaw (inferido):** Minimalismo, performance
 4. **Kimi Claw (inferido):** Python, possivelmente simples
 
-### DO BLUEPRINT J.A.R.V.I.S. (IMPLEMENTAR)
+### DO BLUEPRINT Cognitive Engine (IMPLEMENTAR)
 1. **5 camadas cognitivas:** Decodificação, decomposição, simulação, síntese, monitoramento
 2. **6 modos operacionais:** Padrão, autônomo, crise, pesquisa, aprendizado, fundo
 3. **Memória estratificada:** 5 camadas (trabalho, episódica, semântica, procedural, do operador)
-4. **Comunicação J.A.R.V.I.S.:** Conclusão-primeiro, antecipação contextual, humor sutil
+4. **Comunicação Cognitive Engine:** Conclusão-primeiro, antecipação contextual, humor sutil
 5. **Ética:** Hierarquia de prioridades inviolável
 
 ## 🏗️ ARQUITETURA PROPOSTA PARA JOANA
@@ -134,7 +134,7 @@ Memory System → Tool Registry → Response → Channel
 2. **Configuração:** Híbrida (código + configuração simples)
 3. **Complexidade:** Menor que OpenClaw, maior que Nanobot
 4. **Extensibilidade:** Plugin system para skills
-5. **Segurança:** Herdar padrões ZERO-J.A.R.V.I.S.
+5. **Segurança:** Herdar padrões ZERO-Cognitive Engine
 
 ---
 **Próxima ação:** Criar `DECISOES_ARQUITETURA.md` com especificações técnicas detalhadas.

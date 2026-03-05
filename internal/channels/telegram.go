@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -13,28 +14,30 @@ import (
 
 // TelegramChannel implements the Telegram communication channel
 type TelegramChannel struct {
-	bot     *tgbotapi.BotAPI
-	updates tgbotapi.UpdatesChannel
-	config  TelegramConfig
-	running bool
+	bot        *tgbotapi.BotAPI
+	updates    tgbotapi.UpdatesChannel
+	config     TelegramConfig
+	running    bool
+	orchestrator types.Orchestrator
 }
 
 // TelegramConfig holds Telegram configuration
 type TelegramConfig struct {
 	Token   string
+	ChatID  string
 	Timeout int
 	Debug   bool
 }
 
 // NewTelegramChannel creates a new Telegram channel
-func NewTelegramChannel(config TelegramConfig) (*TelegramChannel, error) {
+func NewTelegramChannel(config TelegramConfig, orchestrator types.Orchestrator) (*TelegramChannel, error) {
 	bot, err := tgbotapi.NewBotAPI(config.Token)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create Telegram bot: %w", err)
 	}
 
 	bot.Debug = config.Debug
-	log.Printf("Authorized on Telegram as %s", bot.Self.UserName)
+	log.Printf("✅ Telegram bot authorized as @%s", bot.Self.UserName)
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = config.Timeout
@@ -42,14 +45,15 @@ func NewTelegramChannel(config TelegramConfig) (*TelegramChannel, error) {
 	updates := bot.GetUpdatesChan(u)
 
 	return &TelegramChannel{
-		bot:     bot,
-		updates: updates,
-		config:  config,
-		running: false,
+		bot:         bot,
+		updates:     updates,
+		config:      config,
+		running:     false,
+		orchestrator: orchestrator,
 	}, nil
 }
 
-// Name returns the channel name
+// GetName returns the channel name
 func (tc *TelegramChannel) GetName() string {
 	return "telegram"
 }
@@ -61,7 +65,7 @@ func (tc *TelegramChannel) Start() error {
 	}
 
 	tc.running = true
-	log.Println("Telegram channel started")
+	log.Println("🚀 Telegram channel started")
 
 	// Start message processing in background
 	ctx := context.Background()
@@ -77,83 +81,31 @@ func (tc *TelegramChannel) Stop() error {
 	}
 
 	tc.running = false
-	tc.bot.StopReceivingUpdates()
 	log.Println("Telegram channel stopped")
-
 	return nil
 }
 
-// SendMessage sends a message through Telegram
-func (tc *TelegramChannel) Send(to string, message *types.Message) error {
-	if !tc.running {
-		return fmt.Errorf("channel not running")
-	}
+// IsRunning returns true if the channel is running
+func (tc *TelegramChannel) IsRunning() bool {
+	return tc.running
+}
 
-	msg := tgbotapi.NewMessage(toInt64(to), message.Text)
-	
-	// Add typing indicator before sending
-	tc.sendTypingIndicator(to)
-	time.Sleep(500 * time.Millisecond) // Simulate human typing delay
-
-	_, err := tc.bot.Send(msg)
+// SendMessage sends a message through the Telegram channel
+func (tc *TelegramChannel) SendMessage(chatID string, message string) error {
+	id, err := strconv.ParseInt(chatID, 10, 64)
 	if err != nil {
-		return fmt.Errorf("failed to send Telegram message: %w", err)
+		return fmt.Errorf("invalid chat ID: %w", err)
 	}
 
-	log.Printf("Sent Telegram message to %s: %s", to, message.Text)
-	return nil
-}
-
-// ReceiveMessages returns a channel for receiving incoming messages
-func (tc *TelegramChannel) ReceiveMessages() <-chan *IncomingMessage {
-	ch := make(chan *IncomingMessage, 100)
-	
-	go func() {
-		for update := range tc.updates {
-			if update.Message == nil {
-				continue
-			}
-
-			// Check if message is from authorized user
-			if !tc.isAuthorized(update.Message.From.ID) {
-				log.Printf("Unauthorized Telegram user: %d", update.Message.From.ID)
-				continue
-			}
-
-			// Convert Telegram message to internal format
-			msg := &IncomingMessage{
-				RawMessage: update.Message,
-				InternalMessage: &types.Message{
-					ID:        fmt.Sprintf("tg-%d", update.Message.MessageID),
-					Channel:   "telegram",
-					Sender: types.Sender{
-						ID:      fmt.Sprintf("%d", update.Message.From.ID),
-						Name:    update.Message.From.UserName,
-						IsAdmin: tc.isAdmin(update.Message.From.ID),
-						Metadata: map[string]string{
-							"first_name": update.Message.From.FirstName,
-							"last_name":  update.Message.From.LastName,
-							"language":   update.Message.From.LanguageCode,
-						},
-					},
-					Text:      update.Message.Text,
-					Timestamp: time.Unix(int64(update.Message.Date), 0),
-					Context: map[string]interface{}{
-						"chat_id":   update.Message.Chat.ID,
-						"message_id": update.Message.MessageID,
-					},
-				},
-			}
-
-			ch <- msg
-		}
-	}()
-
-	return ch
+	msg := tgbotapi.NewMessage(id, message)
+	_, err = tc.bot.Send(msg)
+	return err
 }
 
 // processUpdates processes incoming Telegram updates
 func (tc *TelegramChannel) processUpdates(ctx context.Context) {
+	log.Println("📡 Telegram listening for messages...")
+	
 	for tc.running {
 		select {
 		case <-ctx.Done():
@@ -164,49 +116,68 @@ func (tc *TelegramChannel) processUpdates(ctx context.Context) {
 				continue
 			}
 
-			log.Printf("Received Telegram message from %s: %s", 
-				update.Message.From.UserName, update.Message.Text)
+			chatID := strconv.FormatInt(update.Message.Chat.ID, 10)
+			userID := strconv.FormatInt(update.Message.From.ID, 10)
+			text := update.Message.Text
+			username := update.Message.From.UserName
+
+			log.Printf("📨 Telegram message from @%s (%s): %s", username, userID, text)
+
+			// Send typing indicator
+			tc.sendTypingIndicator(chatID)
+
+			// Check authorization
+			if !tc.isAuthorized(update.Message.From.ID) {
+				log.Printf("⛔ Unauthorized user: %s", username)
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "⛔ Não autorizado.")
+				tc.bot.Send(msg)
+				continue
+			}
+
+			// Create message for orchestrator
+			incomingMsg := types.IncomingMessage{
+				Channel:   "telegram",
+				ChatID:    chatID,
+				UserID:    userID,
+				Username:  username,
+				Text:      text,
+				Timestamp: time.Now(),
+			}
+
+			// Send to orchestrator for processing
+			if tc.orchestrator != nil {
+				go tc.orchestrator.ProcessMessage(incomingMsg)
+			} else {
+				log.Println("⚠️ No orchestrator available to process message")
+			}
 		}
 	}
 }
 
 // sendTypingIndicator sends a typing indicator to the user
 func (tc *TelegramChannel) sendTypingIndicator(chatID string) {
-	chatAction := tgbotapi.NewChatAction(toInt64(chatID), tgbotapi.ChatTyping)
-	_, err := tc.bot.Send(chatAction)
+	id, err := strconv.ParseInt(chatID, 10, 64)
 	if err != nil {
-		log.Printf("Failed to send typing indicator: %v", err)
+		return
 	}
+	
+	chatAction := tgbotapi.NewChatAction(id, tgbotapi.ChatTyping)
+	tc.bot.Send(chatAction)
 }
 
 // isAuthorized checks if a user is authorized
 func (tc *TelegramChannel) isAuthorized(userID int64) bool {
-	// For prototype, only allow the configured admin
-	// In production, this would check against a list of authorized users
-	authorizedUsers := map[int64]bool{
-		974346958: true, // Rafael's Telegram ID
+	// For now, only allow the configured admin
+	adminID, err := strconv.ParseInt(tc.config.ChatID, 10, 64)
+	if err != nil {
+		return false
 	}
 	
-	return authorizedUsers[userID]
+	return userID == adminID
 }
 
-// isAdmin checks if a user is an admin
-func (tc *TelegramChannel) isAdmin(userID int64) bool {
-	admins := map[int64]bool{
-		974346958: true, // Rafael is admin
-	}
-	
-	return admins[userID]
-}
-
-// toInt64 converts string to int64 for Telegram chat IDs
+// Helper function to convert string to int64
 func toInt64(s string) int64 {
-	var result int64
-	fmt.Sscanf(s, "%d", &result)
+	result, _ := strconv.ParseInt(s, 10, 64)
 	return result
-}
-
-// IsRunning returns true if the channel is running
-func (tc *TelegramChannel) IsRunning() bool {
-	return tc.running
 }

@@ -46,7 +46,7 @@ func main() {
 	
 	// Mostrar estrutura
 	fmt.Println("\n=== Estrutura Implementada ===")
-	fmt.Println("internal/core/engine.go - 5 camadas cognitivas J.A.R.V.I.S.")
+	fmt.Println("internal/core/engine.go - 5 camadas cognitivas Cognitive Engine")
 	fmt.Println("internal/memory/manager.go - Sistema de memória estratificada")
 	fmt.Println("internal/mode/manager.go - 6 modos operacionais")
 	fmt.Println("internal/orchestrator/orchestrator.go - Orquestração central")

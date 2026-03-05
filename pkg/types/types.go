@@ -34,7 +34,7 @@ type Response struct {
 	Priority  int
 }
 
-// OperationMode represents the 6 J.A.R.V.I.S. operation modes
+// OperationMode represents the 6 Cognitive Engine operation modes
 type OperationMode int
 
 const (

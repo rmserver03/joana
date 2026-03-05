@@ -2,12 +2,6 @@
 package orchestrator
 
 import (
-	"context"
-	"fmt"
-	"log"
-	"sync"
-	"time"
-
 	"joana.local/internal/channels"
 	"joana.local/internal/core"
 	"joana.local/internal/memory"
@@ -75,7 +69,7 @@ func (o *Orchestrator) Start(ctx context.Context) error {
 			Debug:   false,
 		}
 
-		tgChannel, err := channels.NewTelegramChannel(tgConfig)
+		tgChannel, err := channels.NewTelegramChannel(tgConfig, o)
 		if err != nil {
 			return fmt.Errorf("failed to create Telegram channel: %w", err)
 		}
@@ -298,4 +292,35 @@ func (o *Orchestrator) SetMode(newMode types.OperationMode) {
 // GetMode returns the current operation mode
 func (o *Orchestrator) GetMode() types.OperationMode {
 	return o.reasoningEngine.GetMode()
+}
+// ProcessMessage implements the Orchestrator interface
+func (o *Orchestrator) ProcessMessage(msg types.IncomingMessage) error {
+	if !o.running {
+		return fmt.Errorf("orchestrator not running")
+	}
+
+	log.Printf("Processing message from %s (@%s): %s", 
+		msg.UserID, msg.Username, msg.Text)
+
+	// Convert to internal Message type
+	internalMsg := types.Message{
+		ID:        fmt.Sprintf("msg_%d", time.Now().UnixNano()),
+		Channel:   msg.Channel,
+		Text:      msg.Text,
+		Timestamp: msg.Timestamp,
+		Sender: types.Sender{
+			ID:      msg.UserID,
+			Name:    msg.Username,
+			IsAdmin: msg.UserID == o.config.AdminID,
+		},
+	}
+
+	// Send to message queue
+	select {
+	case o.messageQueue <- internalMsg:
+		log.Printf("Message queued for processing: %s", internalMsg.ID)
+		return nil
+	default:
+		return fmt.Errorf("message queue full")
+	}
 }

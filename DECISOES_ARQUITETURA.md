@@ -2,17 +2,17 @@
 
 **Data:** 26/02/2026 04:20 UTC
 **Status:** Definição arquitetural completa
-**Base:** Blueprint J.A.R.V.I.S. + análise Nanobot/OpenClaw
+**Base:** Blueprint Cognitive Engine + análise Nanobot/OpenClaw
 
 ## 🎯 VISÃO GERAL
-Joana é um sistema de assistência virtual proprietário desenvolvido do zero em Go, com arquitetura inspirada no J.A.R.V.I.S. (5 camadas cognitivas, 6 modos operacionais) e padrões técnicos extraídos de Nanobot (Go, config-driven) e OpenClaw (gateway centralizado, canais uniformes).
+Joana é um sistema de assistência virtual proprietário desenvolvido do zero em Go, com arquitetura inspirada no Cognitive Engine (5 camadas cognitivas, 6 modos operacionais) e padrões técnicos extraídos de Nanobot (Go, config-driven) e OpenClaw (gateway centralizado, canais uniformes).
 
 **Meta de performance:** <100MB RAM, <2s startup, binário único auto-contido.
 
 ## 🏗️ ARQUITETURA DE 7 CAMADAS
 
 ### CAMADA 1: REASONING ENGINE (CORE)
-**Propósito:** Processamento cognitivo em 5 camadas J.A.R.V.I.S.
+**Propósito:** Processamento cognitivo em 5 camadas Cognitive Engine
 **Pacote:** `github.com/rafaelmaciel/joana/core`
 
 #### Componentes:
@@ -48,7 +48,7 @@ type ReasoningEngine interface {
 - **Isolamento total** entre usuários (hash de IDs)
 
 ### CAMADA 3: MODE MANAGER
-**Propósito:** Gerenciamento dos 6 modos operacionais J.A.R.V.I.S.
+**Propósito:** Gerenciamento dos 6 modos operacionais Cognitive Engine
 **Pacote:** `github.com/rafaelmaciel/joana/mode`
 
 #### Modos:
@@ -119,10 +119,10 @@ MemoryUpdater → ResponseBuilder → ChannelSender
 #### Componentes:
 1. **MessageRouter** - Roteamento inteligente entre canais
 2. **SessionManager** - Gerencia sessões por usuário/grupo
-3. **ResponseBuilder** - Constrói respostas no formato J.A.R.V.I.S.
+3. **ResponseBuilder** - Constrói respostas no formato Cognitive Engine
 
 ### CAMADA 7: SECURITY LAYER
-**Propósito:** Segurança e ética (hierarquia de prioridades J.A.R.V.I.S.)
+**Propósito:** Segurança e ética (hierarquia de prioridades Cognitive Engine)
 **Pacote:** `github.com/rafaelmaciel/joana/security`
 
 #### Princípios:
@@ -208,7 +208,7 @@ security:
 4. **CLI para testes**
 
 ### FASE 2: MODOS OPERACIONAIS (Duração: 1 hora)
-1. **Mode Manager** - 6 modos J.A.R.V.I.S.
+1. **Mode Manager** - 6 modos Cognitive Engine
 2. **Transições automáticas**
 3. **Log de modos**
 

@@ -1,4 +1,4 @@
-// Package memory implements the 5-layer J.A.R.V.I.S. memory system
+// Package memory implements the 5-layer Cognitive Engine memory system
 package memory
 
 import (

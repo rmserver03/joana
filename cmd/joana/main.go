@@ -127,7 +127,7 @@ func printBanner() {
 ╚█████╔╝╚██████╔╝██║  ██║██║ ╚████║██║  ██║
  ╚════╝  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝
                                            
-   J.A.R.V.I.S.-inspired Cognitive System
+   Cognitive Engine-inspired Cognitive System
           Version: 0.1.0 (Prototype)
 `
 	fmt.Println(banner)

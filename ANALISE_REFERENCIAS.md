@@ -5,7 +5,7 @@ Analisar 4 frameworks open source para extrair padrões arquiteturais e construi
 
 **Data de início:** 26/02/2026  
 **Modo operacional:** Pesquisa (Fase 0)  
-**Responsável:** ZERO-J.A.R.V.I.S. Hybrid
+**Responsável:** ZERO-Cognitive Engine Hybrid
 
 ---
 
@@ -175,8 +175,8 @@ Analisar 4 frameworks open source para extrair padrões arquiteturais e construi
 
 ### 2. ARQUITETURA: 7 Camadas Modulares
 1. **Reasoning Engine** (OpenClaw-inspired)
-2. **Memory System** (estratificado como ZERO-J.A.R.V.I.S.)
-3. **Security Layer** (herança ZERO-J.A.R.V.I.S.)
+2. **Memory System** (estratificado como ZERO-Cognitive Engine)
+3. **Security Layer** (herança ZERO-Cognitive Engine)
 4. **Orchestrator** (Nanobot-inspired)
 5. **Provider Registry** (Kimi Claw-inspired)
 6. **Tools System** (OpenClaw skills adaptado)
@@ -192,7 +192,7 @@ Analisar 4 frameworks open source para extrair padrões arquiteturais e construi
 - Memória sob demanda
 - Otimização de context windows
 
-### 5. SEGURANÇA: Protocolos ZERO-J.A.R.V.I.S.
+### 5. SEGURANÇA: Protocolos ZERO-Cognitive Engine
 - Fonte única de comandos (apenas Rafael)
 - Sanitização de entradas
 - Auditoria completa
@@ -203,7 +203,7 @@ Analisar 4 frameworks open source para extrair padrões arquiteturais e construi
 ## 🚀 PRÓXIMOS PASSOS (Fase 0)
 
 ### 1. Localizar Blueprint Comportamental
-- Procurar "JARVIS_Blueprint_Definitivo_v2.md" no sistema
+- Procurar "Cognitive Engine_Blueprint_Definitivo_v2.md" no sistema
 - Se não encontrar, solicitar ao Rafael
 
 ### 2. Clonar Repositórios para Análise
@@ -250,4 +250,4 @@ git clone https://github.com/kimi-claw/kimi-claw.git ~/zero/analise/kimi-claw
 
 **Status:** Análise inicial concluída  
 **Próxima ação:** Clonar repositórios e análise técnica detalhada  
-**Responsável:** ZERO-J.A.R.V.I.S. Hybrid
+**Responsável:** ZERO-Cognitive Engine Hybrid

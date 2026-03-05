@@ -1,4 +1,4 @@
-// Package mode implements the 6 J.A.R.V.I.S. operation modes
+// Package mode implements the 6 Cognitive Engine operation modes
 package mode
 
 import (
@@ -10,7 +10,7 @@ import (
 	"joana.local/pkg/types"
 )
 
-// ModeManager manages the 6 J.A.R.V.I.S. operation modes
+// ModeManager manages the 6 Cognitive Engine operation modes
 type ModeManager struct {
 	currentMode    types.OperationMode
 	modeHistory    []ModeTransition
@@ -205,7 +205,7 @@ func (d *ResearchDetector) Detect(ctx context.Context, msg *types.Message, curre
 type StandardHandler struct{}
 
 func (h *StandardHandler) Process(ctx context.Context, msg *types.Message) (*types.Response, error) {
-	// Standard J.A.R.V.I.S. response
+	// Standard Cognitive Engine response
 	response := fmt.Sprintf("Processado em modo padrão: %s", msg.Text)
 	
 	// Add occasional subtle humor (<20%)

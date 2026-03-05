@@ -5,14 +5,14 @@
 **Status:** Sistema mínimo funcional implementado
 
 ## 🎯 VISÃO GERAL
-Joana é um sistema de assistência virtual proprietário desenvolvido do zero em Go, com arquitetura inspirada no J.A.R.V.I.S. (5 camadas cognitivas, 6 modos operacionais) e padrões técnicos extraídos de Nanobot (Go) e OpenClaw (gateway centralizado).
+Joana é um sistema de assistência virtual proprietário desenvolvido do zero em Go, com arquitetura inspirada no Cognitive Engine (5 camadas cognitivas, 6 modos operacionais) e padrões técnicos extraídos de Nanobot (Go) e OpenClaw (gateway centralizado).
 
 **Meta de performance alcançada:** <100MB RAM, <2s startup, binário único auto-contido.
 
 ## 🏗️ ARQUITETURA IMPLEMENTADA
 
 ### 7 CAMADAS FUNCIONAIS
-1. **Reasoning Engine** - 5 camadas cognitivas J.A.R.V.I.S.
+1. **Reasoning Engine** - 5 camadas cognitivas Cognitive Engine
 2. **Memory System** - 5 camadas de memória estratificada
 3. **Mode Manager** - 6 modos operacionais
 4. **Channel System** - Abstração de canais (Telegram)
@@ -121,7 +121,7 @@ go run cmd/joana/main.go --test-mode
 - ✅ Controle de usuários autorizados
 - ✅ Log de todas as interações
 
-## 🎭 COMUNICAÇÃO J.A.R.V.I.S.
+## 🎭 COMUNICAÇÃO Cognitive Engine
 
 ### PRINCÍPIOS IMPLEMENTADOS
 1. **Conclusão-primeiro** - Resultado imediato
@@ -141,7 +141,7 @@ go run cmd/joana/main.go --test-mode
 
 ## 🔒 SEGURANÇA
 
-### HIERARQUIA DE PRIORIDADES (J.A.R.V.I.S.)
+### HIERARQUIA DE PRIORIDADES (Cognitive Engine)
 1. **Segurança de Rafael** - Inviolável
 2. **Integridade da informação** - Dados corretos
 3. **Privacidade** - Dados isolados por usuário
@@ -211,7 +211,7 @@ joana/
 Este é um protótipo funcional desenvolvido em ~3 horas. Para questões:
 - **Documentação:** `DECISOES_ARQUITETURA.md` (especificações completas)
 - **Análise:** `ANALISE_REFERENCIAS_COMPLETA.md` (frameworks estudados)
-- **Blueprint:** `ESPECIFICACAO_JARVIS.md` (12 partes J.A.R.V.I.S.)
+- **Blueprint:** `ESPECIFICACAO_Cognitive Engine.md` (12 partes Cognitive Engine)
 
 ## 📊 STATUS DO PROJETO
 - **Fase 1 (Core):** ✅ COMPLETA (protótipo funcional)
@@ -224,4 +224,4 @@ Este é um protótipo funcional desenvolvido em ~3 horas. Para questões:
 ---
 **Chefe, o protótipo está funcional e atende todas as metas de performance.** 
 Pode testar com `go run cmd/joana/main.go` (configure o token do Telegram primeiro).
-O sistema implementa 100% da arquitetura J.A.R.V.I.S. em Go, com <100MB RAM e <2s startup.
+O sistema implementa 100% da arquitetura Cognitive Engine em Go, com <100MB RAM e <2s startup.

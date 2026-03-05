@@ -1,4 +1,4 @@
-// Package core implements the J.A.R.V.I.S. reasoning engine with 5 layers
+// Package core implements the Cognitive Engine reasoning engine with 5 layers
 package core
 
 import (
@@ -10,7 +10,7 @@ import (
 	"joana.local/pkg/types"
 )
 
-// ReasoningEngine implements the 5-layer J.A.R.V.I.S. cognitive architecture
+// ReasoningEngine implements the 5-layer Cognitive Engine cognitive architecture
 type ReasoningEngine struct {
 	currentMode types.OperationMode
 	layers      []ReasoningLayer
@@ -92,7 +92,7 @@ func (e *ReasoningEngine) buildResponse(ctx *types.ReasoningContext) *types.Resp
 		decision = "Processed your message through 5 cognitive layers."
 	}
 
-	// Add J.A.R.V.I.S. communication style based on mode
+	// Add Cognitive Engine communication style based on mode
 	var responseText string
 	switch e.currentMode {
 	case types.ModeCrisis:
@@ -102,7 +102,7 @@ func (e *ReasoningEngine) buildResponse(ctx *types.ReasoningContext) *types.Resp
 	case types.ModeResearch:
 		responseText = fmt.Sprintf("Research complete: %s", decision)
 	default:
-		// Standard J.A.R.V.I.S. communication: conclusion-first
+		// Standard Cognitive Engine communication: conclusion-first
 		responseText = decision
 		
 		// Add subtle humor occasionally (less than 20%)
@@ -187,7 +187,7 @@ func (s *DecisionSynthesizer) Process(ctx *types.ReasoningContext) (*types.Reaso
 	case "command":
 		decision = "Command detected. Processing with appropriate security checks."
 	case "conversation":
-		decision = "Engaging in conversational mode with J.A.R.V.I.S. protocols."
+		decision = "Engaging in conversational mode with Cognitive Engine protocols."
 	default:
 		decision = "Processing complete. Ready for action."
 	}
