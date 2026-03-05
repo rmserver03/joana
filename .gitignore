@@ -56,4 +56,14 @@ coverage/
 
 # Go
 vendor/
-go.sum
+go.sum.env
+
+# Arquivos gerados automaticamente pelo instalador
+joana
+joana_android
+start_joana.sh
+stop_joana.sh
+status_joana.sh
+.env
+.env.local
+
