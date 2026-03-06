@@ -199,10 +199,27 @@ while [ -z "$TELEGRAM_TOKEN" ]; do
     TELEGRAM_TOKEN=$(ask "Digite o token do seu bot Telegram: ")
     if [ -z "$TELEGRAM_TOKEN" ]; then
         warning "Token não pode ser vazio"
+    else
+        # Validar formato básico do token
+        if [[ "$TELEGRAM_TOKEN" =~ ^[0-9]+:[A-Za-z0-9_-]+$ ]]; then
+            success "✓ Token Telegram recebido e validado"
+        else
+            warning "Formato do token parece inválido (deve ser números:letras)"
+            if ask_yesno "Continuar mesmo assim?"; then
+                success "✓ Token Telegram recebido (formato não validado)"
+            else
+                TELEGRAM_TOKEN=""
+            fi
+        fi
     fi
 done
 
 TELEGRAM_CHAT_ID=$(ask "Digite seu ID do Telegram (ou deixe em branco para detectar automaticamente): ")
+if [ -n "$TELEGRAM_CHAT_ID" ]; then
+    success "✓ ID do Telegram recebido: $TELEGRAM_CHAT_ID"
+else
+    info "ID do Telegram será detectado automaticamente na primeira mensagem"
+fi
 
 # Configuração da API LLM
 echo ""
@@ -212,37 +229,82 @@ echo "1. DeepSeek (recomendado, gratuito)"
 echo "2. OpenAI (pago)"
 echo "3. Anthropic Claude (pago)"
 echo "4. Local (Ollama, LM Studio)"
+echo "5. Cloud (qualquer API compatível com OpenAI)"
+echo "6. Pular configuração por agora"
 echo ""
 
-LLM_PROVIDER=$(ask "Digite o número da opção (1-4): ")
+LLM_PROVIDER=$(ask "Digite o número da opção (1-6): ")
 
 case $LLM_PROVIDER in
     1)
         LLM_PROVIDER="deepseek"
         DEEPSEEK_API_KEY=$(ask "Digite sua API Key do DeepSeek: ")
+        if [ -n "$DEEPSEEK_API_KEY" ]; then
+            success "✓ API Key do DeepSeek recebida"
+        else
+            warning "API Key vazia - você pode configurar depois em $CONFIG_DIR/config.yaml"
+        fi
         ;;
     2)
         LLM_PROVIDER="openai"
         OPENAI_API_KEY=$(ask "Digite sua API Key da OpenAI: ")
+        if [ -n "$OPENAI_API_KEY" ]; then
+            success "✓ API Key da OpenAI recebida"
+        else
+            warning "API Key vazia - você pode configurar depois em $CONFIG_DIR/config.yaml"
+        fi
         ;;
     3)
         LLM_PROVIDER="anthropic"
         ANTHROPIC_API_KEY=$(ask "Digite sua API Key da Anthropic: ")
+        if [ -n "$ANTHROPIC_API_KEY" ]; then
+            success "✓ API Key da Anthropic recebida"
+        else
+            warning "API Key vazia - você pode configurar depois em $CONFIG_DIR/config.yaml"
+        fi
         ;;
     4)
         LLM_PROVIDER="local"
         LOCAL_API_URL=$(ask "Digite a URL da API local (ex: http://localhost:11434): ")
+        if [ -n "$LOCAL_API_URL" ]; then
+            success "✓ URL da API local recebida: $LOCAL_API_URL"
+        else
+            warning "URL vazia - usando padrão http://localhost:11434"
+            LOCAL_API_URL="http://localhost:11434"
+        fi
+        ;;
+    5)
+        LLM_PROVIDER="cloud"
+        CLOUD_API_KEY=$(ask "Digite sua API Key (OpenAI-compatible): ")
+        CLOUD_BASE_URL=$(ask "Digite a URL base da API (ex: https://api.openrouter.ai/v1): ")
+        if [ -n "$CLOUD_API_KEY" ] && [ -n "$CLOUD_BASE_URL" ]; then
+            success "✓ Configuração cloud recebida"
+        else
+            warning "Configuração incompleta - você pode configurar depois em $CONFIG_DIR/config.yaml"
+        fi
+        ;;
+    6)
+        LLM_PROVIDER="none"
+        info "Configuração de LLM pulada. Configure manualmente depois em $CONFIG_DIR/config.yaml"
         ;;
     *)
         LLM_PROVIDER="deepseek"
         warning "Opção inválida, usando DeepSeek como padrão"
         DEEPSEEK_API_KEY=$(ask "Digite sua API Key do DeepSeek: ")
+        if [ -n "$DEEPSEEK_API_KEY" ]; then
+            success "✓ API Key do DeepSeek recebida"
+        fi
         ;;
 esac
 
-# Configuração do Google Sheets (opcional)
+# Configuração do Google Sheets (opcional - apenas se necessário)
 echo ""
-if ask_yesno "Deseja configurar integração com Google Sheets? (Opcional)"; then
+info "INTEGRAÇÃO GOOGLE SHEETS (OPCIONAL)"
+echo "Nota: Esta integração é apenas para quando você for criar uma planilha específica."
+echo "Se não tem uma planilha pronta, pule esta etapa."
+echo ""
+
+if ask_yesno "Deseja configurar integração com Google Sheets AGORA? (Recomendado: NÃO)"; then
     info "CONFIGURAÇÃO GOOGLE SHEETS"
     echo "Para configurar o Google Sheets:"
     echo "1. Acesse https://console.cloud.google.com"
@@ -253,8 +315,17 @@ if ask_yesno "Deseja configurar integração com Google Sheets? (Opcional)"; the
     GOOGLE_CREDS_FILE=$(ask "Caminho para o arquivo JSON de credenciais (ou deixe em branco para pular): ")
     if [ -n "$GOOGLE_CREDS_FILE" ] && [ -f "$GOOGLE_CREDS_FILE" ]; then
         cp "$GOOGLE_CREDS_FILE" "$CONFIG_DIR/google_credentials.json"
-        GOOGLE_SHEET_ID=$(ask "ID da planilha Google Sheets: ")
+        success "✓ Credenciais Google copiadas"
+        GOOGLE_SHEET_ID=$(ask "ID da planilha Google Sheets (ou deixe em branco para configurar depois): ")
+        if [ -n "$GOOGLE_SHEET_ID" ]; then
+            success "✓ ID da planilha recebido"
+        fi
+    else
+        warning "Arquivo de credenciais não encontrado ou inválido"
+        info "Você pode configurar o Google Sheets depois em $CONFIG_DIR/config.yaml"
     fi
+else
+    info "Integração Google Sheets pulada. Configure quando criar sua planilha."
 fi
 
 # ============================================================================
@@ -279,8 +350,8 @@ telegram:
 llm:
   provider: "$LLM_PROVIDER"
   model: "deepseek-chat"
-  api_key: "$DEEPSEEK_API_KEY"
-  base_url: "https://api.deepseek.com"
+  api_key: "${DEEPSEEK_API_KEY:-${OPENAI_API_KEY:-${ANTHROPIC_API_KEY:-${CLOUD_API_KEY:-}}}"
+  base_url: "${CLOUD_BASE_URL:-https://api.deepseek.com}"
   temperature: 0.7
   max_tokens: 2000
 
@@ -323,23 +394,46 @@ export GOARCH=arm64
 # Verificar se temos a versão simplificada (sem SQLite CGO)
 if [ -f "./cmd/joana_simple/main.go" ]; then
     info "Compilando versão simplificada (Android compatível)..."
-    if ! CGO_ENABLED=0 go build -o "$INSTALL_DIR/joana" ./cmd/joana_simple/; then
-        warning "Falha na versão simplificada, tentando versão principal com ajustes..."
+    if CGO_ENABLED=0 go build -o "$INSTALL_DIR/joana" ./cmd/joana_simple/ 2>&1 | tee -a "$LOG_FILE"; then
+        success "✓ Sistema Joana compilado com sucesso (versão simplificada)"
+    else
+        COMPILE_ERROR=$?
+        warning "Falha na versão simplificada (código: $COMPILE_ERROR), tentando versão principal..."
         
         # Tentar compilar versão principal com workaround
-        if ! CGO_ENABLED=0 go build -o "$INSTALL_DIR/joana" ./cmd/joana/ 2>/dev/null; then
-            error "Falha ao compilar Joana para Android. Instale pacotes de desenvolvimento: pkg install golang clang"
+        if CGO_ENABLED=0 go build -o "$INSTALL_DIR/joana" ./cmd/joana/ 2>&1 | tee -a "$LOG_FILE"; then
+            success "✓ Sistema Joana compilado com sucesso (versão principal)"
+        else
+            MAIN_COMPILE_ERROR=$?
+            error "Falha ao compilar Joana para Android (erros: $COMPILE_ERROR, $MAIN_COMPILE_ERROR)."
+            echo ""
+            info "SOLUÇÃO:"
+            echo "1. Execute: pkg install golang clang make -y"
+            echo "2. Execute: export CGO_ENABLED=0"
+            echo "3. Tente manualmente: cd $INSTALL_DIR && CGO_ENABLED=0 go build ./cmd/joana_simple/"
+            echo ""
+            info "Log completo em: $LOG_FILE"
+            exit 1
         fi
     fi
 else
     # Tentar versão principal
     info "Compilando versão principal (pode falhar no Android)..."
-    if ! CGO_ENABLED=0 go build -o "$INSTALL_DIR/joana" ./cmd/joana/; then
-        error "Falha na compilação. Execute: pkg install golang clang make"
+    if CGO_ENABLED=0 go build -o "$INSTALL_DIR/joana" ./cmd/joana/ 2>&1 | tee -a "$LOG_FILE"; then
+        success "✓ Sistema Joana compilado com sucesso"
+    else
+        COMPILE_ERROR=$?
+        error "Falha na compilação (código: $COMPILE_ERROR)."
+        echo ""
+        info "SOLUÇÃO:"
+        echo "1. Execute: pkg install golang clang make -y"
+        echo "2. Execute: export CGO_ENABLED=0"
+        echo "3. Tente manualmente: cd $INSTALL_DIR && CGO_ENABLED=0 go build ./cmd/joana/"
+        echo ""
+        info "Log completo em: $LOG_FILE"
+        exit 1
     fi
 fi
-
-success "Sistema Joana compilado com sucesso para Android"
 
 # ============================================================================
 # ETAPA 8: CRIAÇÃO DE SCRIPTS DE GERENCIAMENTO
