@@ -310,19 +310,36 @@ EOF
 success "Arquivo de configuração criado: $CONFIG_DIR/config.yaml"
 
 # ============================================================================
-# ETAPA 7: COMPILAÇÃO DO SISTEMA GO
+# ETAPA 7: COMPILAÇÃO DO SISTEMA GO (ANDROID COMPATÍVEL)
 # ============================================================================
-info "Compilando sistema Joana (Go)..."
+info "Compilando sistema Joana para Android (sem CGO)..."
 cd "$INSTALL_DIR"
 
-# Verificar se o código compila
-if ! go build ./cmd/joana/; then
-    error "Falha ao compilar Joana. Verifique os logs."
+# Configurar ambiente para Android/Termux
+export CGO_ENABLED=0
+export GOOS=linux
+export GOARCH=arm64
+
+# Verificar se temos a versão simplificada (sem SQLite CGO)
+if [ -f "./cmd/joana_simple/main.go" ]; then
+    info "Compilando versão simplificada (Android compatível)..."
+    if ! CGO_ENABLED=0 go build -o "$INSTALL_DIR/joana" ./cmd/joana_simple/; then
+        warning "Falha na versão simplificada, tentando versão principal com ajustes..."
+        
+        # Tentar compilar versão principal com workaround
+        if ! CGO_ENABLED=0 go build -o "$INSTALL_DIR/joana" ./cmd/joana/ 2>/dev/null; then
+            error "Falha ao compilar Joana para Android. Instale pacotes de desenvolvimento: pkg install golang clang"
+        fi
+    fi
+else
+    # Tentar versão principal
+    info "Compilando versão principal (pode falhar no Android)..."
+    if ! CGO_ENABLED=0 go build -o "$INSTALL_DIR/joana" ./cmd/joana/; then
+        error "Falha na compilação. Execute: pkg install golang clang make"
+    fi
 fi
 
-# Compilar binário principal
-go build -o "$INSTALL_DIR/joana" ./cmd/joana/
-success "Sistema Joana compilado com sucesso"
+success "Sistema Joana compilado com sucesso para Android"
 
 # ============================================================================
 # ETAPA 8: CRIAÇÃO DE SCRIPTS DE GERENCIAMENTO
