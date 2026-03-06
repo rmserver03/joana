@@ -352,7 +352,7 @@ telegram:
 llm:
   provider: "$LLM_PROVIDER"
   model: "deepseek-chat"
-  api_key: "${DEEPSEEK_API_KEY:-${OPENAI_API_KEY:-${ANTHROPIC_API_KEY:-${CLOUD_API_KEY:-}}}"
+  api_key: "${DEEPSEEK_API_KEY:-${OPENAI_API_KEY:-${ANTHROPIC_API_KEY:-${CLOUD_API_KEY:-}}}}"
   base_url: "${CLOUD_BASE_URL:-https://api.deepseek.com}"
   temperature: 0.7
   max_tokens: 2000
