@@ -2,6 +2,12 @@
 package orchestrator
 
 import (
+	"context"
+	"fmt"
+	"log"
+	"sync"
+	"time"
+
 	"joana.local/internal/channels"
 	"joana.local/internal/core"
 	"joana.local/internal/memory"
@@ -18,12 +24,14 @@ type Orchestrator struct {
 	config          Config
 	running         bool
 	mu              sync.RWMutex
+	messageQueue    chan types.Message
 }
 
 // Config holds orchestrator configuration
 type Config struct {
-	MemoryDBPath string
+	MemoryDBPath  string
 	TelegramToken string
+	AdminID       string
 }
 
 // NewOrchestrator creates a new orchestrator
@@ -47,6 +55,7 @@ func NewOrchestrator(config Config) (*Orchestrator, error) {
 		channels:        make(map[string]channels.Channel),
 		config:          config,
 		running:         false,
+		messageQueue:    make(chan types.Message, 100),
 	}
 
 	return o, nil
@@ -123,20 +132,24 @@ func (o *Orchestrator) Stop(ctx context.Context) error {
 func (o *Orchestrator) processMessages(ctx context.Context) {
 	// Collect message channels from all active channels
 	messageChans := make([]<-chan *channels.IncomingMessage, 0, len(o.channels))
-	
+
 	for name, channel := range o.channels {
 		msgChan := channel.ReceiveMessages()
 		messageChans = append(messageChans, msgChan)
 		log.Printf("Listening for messages from channel: %s", name)
 	}
 
-	// Process messages from all channels
+	// Process messages from all channels and message queue
 	for o.running {
 		select {
 		case <-ctx.Done():
 			o.running = false
 			return
-		
+
+		// Process messages from message queue (legacy ProcessMessage calls)
+		case queuedMsg := <-o.messageQueue:
+			go o.handleMessage(ctx, &queuedMsg)
+
 		default:
 			// Check all message channels
 			for _, msgChan := range messageChans {
@@ -149,7 +162,7 @@ func (o *Orchestrator) processMessages(ctx context.Context) {
 					// No message in this channel, continue
 				}
 			}
-			
+
 			// Small sleep to prevent CPU spinning
 			time.Sleep(10 * time.Millisecond)
 		}
@@ -218,8 +231,8 @@ func (o *Orchestrator) sendResponse(response *types.Response) error {
 
 	// Convert response to message
 	msg := &types.Message{
-		ID:        response.ID,
-		Channel:   response.Channel,
+		ID:      response.ID,
+		Channel: response.Channel,
 		Sender: types.Sender{
 			ID:      "joana",
 			Name:    "Joana",
@@ -293,13 +306,14 @@ func (o *Orchestrator) SetMode(newMode types.OperationMode) {
 func (o *Orchestrator) GetMode() types.OperationMode {
 	return o.reasoningEngine.GetMode()
 }
+
 // ProcessMessage implements the Orchestrator interface
 func (o *Orchestrator) ProcessMessage(msg types.IncomingMessage) error {
 	if !o.running {
 		return fmt.Errorf("orchestrator not running")
 	}
 
-	log.Printf("Processing message from %s (@%s): %s", 
+	log.Printf("Processing message from %s (@%s): %s",
 		msg.UserID, msg.Username, msg.Text)
 
 	// Convert to internal Message type

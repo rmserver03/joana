@@ -20,7 +20,7 @@ func NewSheetsClient(baseURL string) *SheetsClient {
 	if baseURL == "" {
 		baseURL = "http://localhost:28794"
 	}
-	
+
 	return &SheetsClient{
 		baseURL: baseURL,
 		httpClient: &http.Client{
@@ -36,11 +36,11 @@ func (c *SheetsClient) HealthCheck() (bool, error) {
 		return false, fmt.Errorf("erro ao verificar saúde do serviço: %v", err)
 	}
 	defer resp.Body.Close()
-	
+
 	if resp.StatusCode != http.StatusOK {
 		return false, fmt.Errorf("serviço retornou status %d", resp.StatusCode)
 	}
-	
+
 	return true, nil
 }
 
@@ -50,12 +50,12 @@ func (c *SheetsClient) ReadSheet(spreadsheetID, rangeName string) ([]map[string]
 		"spreadsheet_id": spreadsheetID,
 		"range":          rangeName,
 	}
-	
+
 	jsonBody, err := json.Marshal(requestBody)
 	if err != nil {
 		return nil, fmt.Errorf("erro ao serializar request: %v", err)
 	}
-	
+
 	resp, err := c.httpClient.Post(
 		c.baseURL+"/api/sheets/read",
 		"application/json",
@@ -65,12 +65,12 @@ func (c *SheetsClient) ReadSheet(spreadsheetID, rangeName string) ([]map[string]
 		return nil, fmt.Errorf("erro na requisição HTTP: %v", err)
 	}
 	defer resp.Body.Close()
-	
+
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("erro ao ler resposta: %v", err)
 	}
-	
+
 	if resp.StatusCode != http.StatusOK {
 		var errorResp map[string]interface{}
 		if err := json.Unmarshal(body, &errorResp); err == nil {
@@ -80,22 +80,22 @@ func (c *SheetsClient) ReadSheet(spreadsheetID, rangeName string) ([]map[string]
 		}
 		return nil, fmt.Errorf("status %d: %s", resp.StatusCode, string(body))
 	}
-	
+
 	var result struct {
 		Success   bool                     `json:"success"`
 		Data      []map[string]interface{} `json:"data"`
 		TotalRows int                      `json:"total_rows"`
 		Error     string                   `json:"error,omitempty"`
 	}
-	
+
 	if err := json.Unmarshal(body, &result); err != nil {
 		return nil, fmt.Errorf("erro ao decodificar resposta: %v", err)
 	}
-	
+
 	if !result.Success {
 		return nil, fmt.Errorf("serviço retornou erro: %s", result.Error)
 	}
-	
+
 	return result.Data, nil
 }
 
@@ -106,12 +106,12 @@ func (c *SheetsClient) WriteSheet(spreadsheetID, rangeName string, values [][]in
 		"range":          rangeName,
 		"values":         values,
 	}
-	
+
 	jsonBody, err := json.Marshal(requestBody)
 	if err != nil {
 		return nil, fmt.Errorf("erro ao serializar request: %v", err)
 	}
-	
+
 	resp, err := c.httpClient.Post(
 		c.baseURL+"/api/sheets/write",
 		"application/json",
@@ -121,12 +121,12 @@ func (c *SheetsClient) WriteSheet(spreadsheetID, rangeName string, values [][]in
 		return nil, fmt.Errorf("erro na requisição HTTP: %v", err)
 	}
 	defer resp.Body.Close()
-	
+
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("erro ao ler resposta: %v", err)
 	}
-	
+
 	if resp.StatusCode != http.StatusOK {
 		var errorResp map[string]interface{}
 		if err := json.Unmarshal(body, &errorResp); err == nil {
@@ -136,16 +136,16 @@ func (c *SheetsClient) WriteSheet(spreadsheetID, rangeName string, values [][]in
 		}
 		return nil, fmt.Errorf("status %d: %s", resp.StatusCode, string(body))
 	}
-	
+
 	var result map[string]interface{}
 	if err := json.Unmarshal(body, &result); err != nil {
 		return nil, fmt.Errorf("erro ao decodificar resposta: %v", err)
 	}
-	
+
 	if success, ok := result["success"].(bool); !ok || !success {
 		return nil, fmt.Errorf("escrita falhou: %v", result)
 	}
-	
+
 	return result, nil
 }
 
@@ -154,12 +154,12 @@ func (c *SheetsClient) ListSheets(spreadsheetID string) ([]map[string]interface{
 	requestBody := map[string]string{
 		"spreadsheet_id": spreadsheetID,
 	}
-	
+
 	jsonBody, err := json.Marshal(requestBody)
 	if err != nil {
 		return nil, fmt.Errorf("erro ao serializar request: %v", err)
 	}
-	
+
 	resp, err := c.httpClient.Post(
 		c.baseURL+"/api/sheets/sheets",
 		"application/json",
@@ -169,12 +169,12 @@ func (c *SheetsClient) ListSheets(spreadsheetID string) ([]map[string]interface{
 		return nil, fmt.Errorf("erro na requisição HTTP: %v", err)
 	}
 	defer resp.Body.Close()
-	
+
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("erro ao ler resposta: %v", err)
 	}
-	
+
 	if resp.StatusCode != http.StatusOK {
 		var errorResp map[string]interface{}
 		if err := json.Unmarshal(body, &errorResp); err == nil {
@@ -184,22 +184,22 @@ func (c *SheetsClient) ListSheets(spreadsheetID string) ([]map[string]interface{
 		}
 		return nil, fmt.Errorf("status %d: %s", resp.StatusCode, string(body))
 	}
-	
+
 	var result struct {
-		Success         bool                     `json:"success"`
-		Sheets          []map[string]interface{} `json:"sheets"`
+		Success          bool                     `json:"success"`
+		Sheets           []map[string]interface{} `json:"sheets"`
 		SpreadsheetTitle string                   `json:"spreadsheet_title"`
-		Error           string                   `json:"error,omitempty"`
+		Error            string                   `json:"error,omitempty"`
 	}
-	
+
 	if err := json.Unmarshal(body, &result); err != nil {
 		return nil, fmt.Errorf("erro ao decodificar resposta: %v", err)
 	}
-	
+
 	if !result.Success {
 		return nil, fmt.Errorf("serviço retornou erro: %s", result.Error)
 	}
-	
+
 	return result.Sheets, nil
 }
 
@@ -209,10 +209,10 @@ func (c *SheetsClient) TestConnection() error {
 	if err != nil {
 		return fmt.Errorf("falha no health check: %v", err)
 	}
-	
+
 	if !healthy {
 		return fmt.Errorf("serviço reportou não saudável")
 	}
-	
+
 	return nil
 }

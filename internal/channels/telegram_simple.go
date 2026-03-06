@@ -71,7 +71,7 @@ func (tc *TelegramChannelSimple) Stop() error {
 // processUpdates processes incoming Telegram updates
 func (tc *TelegramChannelSimple) processUpdates(ctx context.Context) {
 	log.Println("📡 Telegram listening for messages...")
-	
+
 	for tc.running {
 		select {
 		case <-ctx.Done():

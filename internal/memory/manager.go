@@ -136,7 +136,7 @@ func (m *MemoryManager) UpdateWorkingMemory(sessionID string, msg *types.Message
 	wm := m.GetWorkingMemory(sessionID)
 	wm.Messages = append(wm.Messages, msg)
 	wm.LastAccessed = time.Now()
-	
+
 	// Keep only last 100 messages to prevent memory bloat
 	if len(wm.Messages) > 100 {
 		wm.Messages = wm.Messages[len(wm.Messages)-100:]
@@ -155,11 +155,11 @@ func (m *MemoryManager) StoreEpisodicEvent(eventType, description string, contex
 		INSERT INTO episodic_memory (timestamp, event_type, description, context_json, importance)
 		VALUES (?, ?, ?, ?, ?)
 	`, time.Now(), eventType, description, contextJSON, importance)
-	
+
 	if err != nil {
 		return fmt.Errorf("failed to store episodic event: %w", err)
 	}
-	
+
 	log.Printf("Stored episodic event: %s - %s", eventType, description)
 	return nil
 }
@@ -178,13 +178,13 @@ func (m *MemoryManager) GetEpisodicEvents(eventType string, startTime, endTime t
 
 	var rows *sql.Rows
 	var err error
-	
+
 	if eventType != "" {
 		rows, err = m.db.Query(query, startTime, endTime, eventType)
 	} else {
 		rows, err = m.db.Query(query, startTime, endTime)
 	}
-	
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to query episodic events: %w", err)
 	}
@@ -195,11 +195,11 @@ func (m *MemoryManager) GetEpisodicEvents(eventType string, startTime, endTime t
 		var timestamp time.Time
 		var eventType, description, contextJSON string
 		var importance int
-		
+
 		if err := rows.Scan(&timestamp, &eventType, &description, &contextJSON, &importance); err != nil {
 			return nil, fmt.Errorf("failed to scan episodic event: %w", err)
 		}
-		
+
 		events = append(events, map[string]interface{}{
 			"timestamp":   timestamp,
 			"event_type":  eventType,
@@ -219,11 +219,11 @@ func (m *MemoryManager) StoreSemanticKnowledge(domain, key, value, source string
 		(domain, key, value, confidence, source, last_accessed)
 		VALUES (?, ?, ?, ?, ?, ?)
 	`, domain, key, value, confidence, source, time.Now())
-	
+
 	if err != nil {
 		return fmt.Errorf("failed to store semantic knowledge: %w", err)
 	}
-	
+
 	log.Printf("Stored semantic knowledge: %s/%s = %s", domain, key, value)
 	return nil
 }
@@ -232,23 +232,23 @@ func (m *MemoryManager) StoreSemanticKnowledge(domain, key, value, source string
 func (m *MemoryManager) GetSemanticKnowledge(domain, key string) (string, float64, error) {
 	var value string
 	var confidence float64
-	
+
 	err := m.db.QueryRow(`
 		SELECT value, confidence FROM semantic_memory
 		WHERE domain = ? AND key = ?
 	`, domain, key).Scan(&value, &confidence)
-	
+
 	if err == sql.ErrNoRows {
 		return "", 0.0, nil
 	}
 	if err != nil {
 		return "", 0.0, fmt.Errorf("failed to query semantic knowledge: %w", err)
 	}
-	
+
 	// Update last accessed time
 	m.db.Exec(`UPDATE semantic_memory SET last_accessed = ? WHERE domain = ? AND key = ?`,
 		time.Now(), domain, key)
-	
+
 	return value, confidence, nil
 }
 
@@ -260,11 +260,11 @@ func (m *MemoryManager) UpdateOperatorModel(userID string, model *types.UserMode
 		(user_id, cognitive_style, last_updated)
 		VALUES (?, ?, ?)
 	`, userID, model.CognitiveStyle, time.Now())
-	
+
 	if err != nil {
 		return fmt.Errorf("failed to update operator model: %w", err)
 	}
-	
+
 	log.Printf("Updated operator model for user: %s", userID)
 	return nil
 }
@@ -273,12 +273,12 @@ func (m *MemoryManager) UpdateOperatorModel(userID string, model *types.UserMode
 func (m *MemoryManager) GetOperatorModel(userID string) (*types.UserModel, error) {
 	var cognitiveStyle string
 	var lastUpdated time.Time
-	
+
 	err := m.db.QueryRow(`
 		SELECT cognitive_style, last_updated FROM operator_memory
 		WHERE user_id = ?
 	`, userID).Scan(&cognitiveStyle, &lastUpdated)
-	
+
 	if err == sql.ErrNoRows {
 		// Return default model
 		return &types.UserModel{
@@ -289,7 +289,7 @@ func (m *MemoryManager) GetOperatorModel(userID string) (*types.UserModel, error
 	if err != nil {
 		return nil, fmt.Errorf("failed to query operator model: %w", err)
 	}
-	
+
 	return &types.UserModel{
 		UserID:         userID,
 		CognitiveStyle: cognitiveStyle,

@@ -59,11 +59,11 @@ func (m OperationMode) String() string {
 
 // ReasoningContext contains context for the reasoning engine
 type ReasoningContext struct {
-	Context      context.Context
-	Message      *Message
-	CurrentMode  OperationMode
+	Context       context.Context
+	Message       *Message
+	CurrentMode   OperationMode
 	WorkingMemory *WorkingMemory
-	UserModel    *UserModel
+	UserModel     *UserModel
 }
 
 // WorkingMemory represents the working memory layer
@@ -77,22 +77,22 @@ type WorkingMemory struct {
 
 // UserModel represents the operator memory layer (Rafael-specific)
 type UserModel struct {
-	UserID            string
-	CognitiveStyle    string
-	CommunicationPref CommunicationPreferences
-	WorkPatterns      WorkPatterns
-	DecisionPatterns  DecisionPatterns
-	KnownBiases       []string
-	ExpertiseAreas    []string
+	UserID              string
+	CognitiveStyle      string
+	CommunicationPref   CommunicationPreferences
+	WorkPatterns        WorkPatterns
+	DecisionPatterns    DecisionPatterns
+	KnownBiases         []string
+	ExpertiseAreas      []string
 	RelationshipNetwork map[string]Relationship
 }
 
 // CommunicationPreferences defines user communication preferences
 type CommunicationPreferences struct {
-	DetailLevel   string
-	Format        string
-	Frequency     string
-	Tone          string
+	DetailLevel string
+	Format      string
+	Frequency   string
+	Tone        string
 }
 
 // WorkPatterns defines user work patterns
@@ -104,15 +104,15 @@ type WorkPatterns struct {
 
 // DecisionPatterns defines user decision patterns
 type DecisionPatterns struct {
-	Speed          string
-	RiskAversion   float64
+	Speed           string
+	RiskAversion    float64
 	PrimaryCriteria []string
 }
 
 // Relationship defines a relationship in the user's network
 type Relationship struct {
-	Name        string
-	Role        string
-	Importance  int
-	Protocols   []string
+	Name       string
+	Role       string
+	Importance int
+	Protocols  []string
 }

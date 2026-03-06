@@ -77,7 +77,7 @@ func main() {
 		<-sigChan
 		log.Println("Shutdown signal received")
 		cancel()
-		
+
 		// Give orchestrator time to shut down gracefully
 		time.Sleep(2 * time.Second)
 		os.Exit(0)
@@ -103,17 +103,17 @@ func getTelegramToken(flagToken string) string {
 	if flagToken != "" {
 		return flagToken
 	}
-	
+
 	// Try environment variable
 	if envToken := os.Getenv("TELEGRAM_TOKEN"); envToken != "" {
 		return envToken
 	}
-	
+
 	// Try config file (simplified)
 	if token, err := os.ReadFile("./config/telegram.token"); err == nil {
 		return string(token)
 	}
-	
+
 	return ""
 }
 

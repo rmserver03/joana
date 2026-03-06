@@ -9,19 +9,19 @@ import (
 type Channel interface {
 	// Send sends a message through the channel
 	Send(to string, message *types.Message) error
-	
+
 	// ReceiveMessages returns a channel for receiving incoming messages
 	ReceiveMessages() <-chan *IncomingMessage
-	
+
 	// Start starts the channel
 	Start() error
-	
+
 	// Stop stops the channel
 	Stop() error
-	
+
 	// IsRunning returns true if the channel is running
 	IsRunning() bool
-	
+
 	// GetName returns the channel name
 	GetName() string
 }

@@ -39,7 +39,7 @@ func NewReasoningEngine() *ReasoningEngine {
 // Process processes a message through all 5 layers
 func (e *ReasoningEngine) Process(ctx context.Context, msg *types.Message) (*types.Response, error) {
 	start := time.Now()
-	
+
 	// Create reasoning context
 	reasoningCtx := &types.ReasoningContext{
 		Context:     ctx,
@@ -57,7 +57,7 @@ func (e *ReasoningEngine) Process(ctx context.Context, msg *types.Message) (*typ
 	// Process through all layers
 	for i, layer := range e.layers {
 		log.Printf("Processing layer %d: %s", i+1, layer.Name())
-		
+
 		var err error
 		reasoningCtx, err = layer.Process(reasoningCtx)
 		if err != nil {
@@ -68,7 +68,7 @@ func (e *ReasoningEngine) Process(ctx context.Context, msg *types.Message) (*typ
 
 	// Build response based on mode
 	response := e.buildResponse(reasoningCtx)
-	
+
 	log.Printf("Reasoning completed in %v, mode: %s", time.Since(start), e.currentMode)
 	return response, nil
 }
@@ -104,7 +104,7 @@ func (e *ReasoningEngine) buildResponse(ctx *types.ReasoningContext) *types.Resp
 	default:
 		// Standard Cognitive Engine communication: conclusion-first
 		responseText = decision
-		
+
 		// Add subtle humor occasionally (less than 20%)
 		if time.Now().Unix()%5 == 0 { // 20% chance
 			responseText += " Funcionou na primeira tentativa. Devo verificar se estamos em uma simulação?"
@@ -129,7 +129,7 @@ func (d *IntentDecoder) Name() string { return "IntentDecoder" }
 func (d *IntentDecoder) Process(ctx *types.ReasoningContext) (*types.ReasoningContext, error) {
 	// Simplified intent decoding for prototype
 	text := ctx.Message.Text
-	
+
 	// Detect commands
 	if len(text) > 0 && text[0] == '#' {
 		ctx.WorkingMemory.ContextVars["intent"] = "command"
@@ -137,12 +137,12 @@ func (d *IntentDecoder) Process(ctx *types.ReasoningContext) (*types.ReasoningCo
 	} else {
 		ctx.WorkingMemory.ContextVars["intent"] = "conversation"
 	}
-	
+
 	// Detect urgency
 	if containsAny(text, []string{"urgente", "emergência", "ajuda", "socorro"}) {
 		ctx.WorkingMemory.ContextVars["urgency"] = "high"
 	}
-	
+
 	return ctx, nil
 }
 
@@ -181,7 +181,7 @@ func (s *DecisionSynthesizer) Name() string { return "DecisionSynthesizer" }
 func (s *DecisionSynthesizer) Process(ctx *types.ReasoningContext) (*types.ReasoningContext, error) {
 	// Synthesize decision based on all previous layers
 	intent, _ := ctx.WorkingMemory.ContextVars["intent"].(string)
-	
+
 	var decision string
 	switch intent {
 	case "command":
@@ -191,7 +191,7 @@ func (s *DecisionSynthesizer) Process(ctx *types.ReasoningContext) (*types.Reaso
 	default:
 		decision = "Processing complete. Ready for action."
 	}
-	
+
 	ctx.WorkingMemory.ContextVars["decision"] = decision
 	return ctx, nil
 }
@@ -208,12 +208,12 @@ func (m *ContinuousMonitor) Process(ctx *types.ReasoningContext) (*types.Reasoni
 		"accuracy",
 		"user_satisfaction",
 	}
-	
+
 	// Auto-detect crisis mode if urgency is high
 	if urgency, _ := ctx.WorkingMemory.ContextVars["urgency"].(string); urgency == "high" {
 		ctx.CurrentMode = types.ModeCrisis
 	}
-	
+
 	return ctx, nil
 }
 

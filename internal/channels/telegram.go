@@ -14,10 +14,10 @@ import (
 
 // TelegramChannel implements the Telegram communication channel
 type TelegramChannel struct {
-	bot        *tgbotapi.BotAPI
-	updates    tgbotapi.UpdatesChannel
-	config     TelegramConfig
-	running    bool
+	bot          *tgbotapi.BotAPI
+	updates      tgbotapi.UpdatesChannel
+	config       TelegramConfig
+	running      bool
 	orchestrator types.Orchestrator
 }
 
@@ -45,10 +45,10 @@ func NewTelegramChannel(config TelegramConfig, orchestrator types.Orchestrator) 
 	updates := bot.GetUpdatesChan(u)
 
 	return &TelegramChannel{
-		bot:         bot,
-		updates:     updates,
-		config:      config,
-		running:     false,
+		bot:          bot,
+		updates:      updates,
+		config:       config,
+		running:      false,
 		orchestrator: orchestrator,
 	}, nil
 }
@@ -90,7 +90,23 @@ func (tc *TelegramChannel) IsRunning() bool {
 	return tc.running
 }
 
-// SendMessage sends a message through the Telegram channel
+// Send sends a message through the Telegram channel (implements Channel interface)
+func (tc *TelegramChannel) Send(to string, message *types.Message) error {
+	if !tc.running {
+		return fmt.Errorf("channel not running")
+	}
+
+	id, err := strconv.ParseInt(to, 10, 64)
+	if err != nil {
+		return fmt.Errorf("invalid chat ID: %w", err)
+	}
+
+	msg := tgbotapi.NewMessage(id, message.Text)
+	_, err = tc.bot.Send(msg)
+	return err
+}
+
+// SendMessage sends a message through the Telegram channel (legacy method)
 func (tc *TelegramChannel) SendMessage(chatID string, message string) error {
 	id, err := strconv.ParseInt(chatID, 10, 64)
 	if err != nil {
@@ -105,7 +121,7 @@ func (tc *TelegramChannel) SendMessage(chatID string, message string) error {
 // processUpdates processes incoming Telegram updates
 func (tc *TelegramChannel) processUpdates(ctx context.Context) {
 	log.Println("📡 Telegram listening for messages...")
-	
+
 	for tc.running {
 		select {
 		case <-ctx.Done():
@@ -160,7 +176,7 @@ func (tc *TelegramChannel) sendTypingIndicator(chatID string) {
 	if err != nil {
 		return
 	}
-	
+
 	chatAction := tgbotapi.NewChatAction(id, tgbotapi.ChatTyping)
 	tc.bot.Send(chatAction)
 }
@@ -172,7 +188,7 @@ func (tc *TelegramChannel) isAuthorized(userID int64) bool {
 	if err != nil {
 		return false
 	}
-	
+
 	return userID == adminID
 }
 
@@ -180,4 +196,57 @@ func (tc *TelegramChannel) isAuthorized(userID int64) bool {
 func toInt64(s string) int64 {
 	result, _ := strconv.ParseInt(s, 10, 64)
 	return result
+}
+
+// ReceiveMessages returns a channel for receiving incoming messages
+func (tc *TelegramChannel) ReceiveMessages() <-chan *IncomingMessage {
+	// Create a buffered channel for incoming messages
+	msgChan := make(chan *IncomingMessage, 100)
+
+	// Start a goroutine to forward messages from Telegram updates
+	go func() {
+		for tc.running {
+			select {
+			case update := <-tc.updates:
+				if update.Message == nil {
+					continue
+				}
+
+				userID := strconv.FormatInt(update.Message.From.ID, 10)
+				text := update.Message.Text
+				username := update.Message.From.UserName
+
+				// Create internal message
+				internalMsg := &types.Message{
+					ID:      fmt.Sprintf("tg_%d", update.Message.MessageID),
+					Channel: "telegram",
+					Sender: types.Sender{
+						ID:      userID,
+						Name:    username,
+						IsAdmin: tc.isAuthorized(update.Message.From.ID),
+					},
+					Text:      text,
+					Timestamp: time.Now(),
+					Context:   make(map[string]interface{}),
+				}
+
+				// Create incoming message wrapper
+				incomingMsg := &IncomingMessage{
+					RawMessage:      update,
+					InternalMessage: internalMsg,
+				}
+
+				// Send to channel
+				select {
+				case msgChan <- incomingMsg:
+					log.Printf("Forwarded Telegram message to orchestrator: %s", text)
+				default:
+					log.Printf("Message channel full, dropping message: %s", text)
+				}
+			}
+		}
+		close(msgChan)
+	}()
+
+	return msgChan
 }

@@ -12,10 +12,10 @@ import (
 
 // ModeManager manages the 6 Cognitive Engine operation modes
 type ModeManager struct {
-	currentMode    types.OperationMode
-	modeHistory    []ModeTransition
-	modeDetectors  []ModeDetector
-	modeHandlers   map[types.OperationMode]ModeHandler
+	currentMode   types.OperationMode
+	modeHistory   []ModeTransition
+	modeDetectors []ModeDetector
+	modeHandlers  map[types.OperationMode]ModeHandler
 }
 
 // ModeTransition records a mode change
@@ -85,7 +85,7 @@ func (mm *ModeManager) SetMode(newMode types.OperationMode, reason string, conte
 	mm.modeHistory = append(mm.modeHistory, transition)
 	mm.currentMode = newMode
 
-	log.Printf("Mode changed: %s → %s (Reason: %s)", 
+	log.Printf("Mode changed: %s → %s (Reason: %s)",
 		transition.FromMode, transition.ToMode, reason)
 }
 
@@ -207,7 +207,7 @@ type StandardHandler struct{}
 func (h *StandardHandler) Process(ctx context.Context, msg *types.Message) (*types.Response, error) {
 	// Standard Cognitive Engine response
 	response := fmt.Sprintf("Processado em modo padrão: %s", msg.Text)
-	
+
 	// Add occasional subtle humor (<20%)
 	if time.Now().Unix()%5 == 0 {
 		response += " A situação é subótima — tenho sugestões organizadas da mais conservadora à mais teatral."
