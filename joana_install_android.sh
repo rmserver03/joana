@@ -51,19 +51,20 @@ error() {
 }
 
 ask() {
-    echo -e "\e[36m? $1\e[0m"
+    # Mostra prompt no stderr para não ser capturado pelo read
+    printf "? %s " "$1" >&2
     read -r
     echo "$REPLY"
 }
 
 ask_yesno() {
     while true; do
-        echo -e "\e[36m? $1 (s/n)\e[0m"
+        printf "? %s (s/n) " "$1" >&2
         read -r yn
         case $yn in
             [Ss]* ) return 0;;
             [Nn]* ) return 1;;
-            * ) echo "Por favor responda s (sim) ou n (não).";;
+            * ) echo "Por favor responda s (sim) ou n (não)." >&2;;
         esac
     done
 }
