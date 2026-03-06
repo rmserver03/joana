@@ -201,22 +201,6 @@ while [ -z "$TELEGRAM_TOKEN" ]; do
     if [ -z "$TELEGRAM_TOKEN" ]; then
         warning "Token não pode ser vazio"
     else
-        # Validar formato básico do token (mais permissivo para evitar falsos positivos)
-        if [[ "$TELEGRAM_TOKEN" =~ ^[0-9]+:[A-Za-z0-9_-]+$ ]] || [[ "$TELEGRAM_TOKEN" =~ ^[0-9]+:[A-Za-z0-9]+$ ]]; then
-            success "✓ Token Telegram recebido e validado"
-        else
-            # Limpar possíveis espaços ou newlines
-            CLEAN_TOKEN=$(echo "$TELEGRAM_TOKEN" | tr -d '[:space:]')
-            if [[ "$CLEAN_TOKEN" =~ ^[0-9]+:[A-Za-z0-9_-]+$ ]] || [[ "$CLEAN_TOKEN" =~ ^[0-9]+:[A-Za-z0-9]+$ ]]; then
-                TELEGRAM_TOKEN="$CLEAN_TOKEN"
-                success "✓ Token Telegram recebido e validado (após limpeza)"
-            else
-                warning "Formato do token parece inválido (deve ser números:letras/números/hífen/underscore, ex: 123456:ABCdef123-_)"
-                if ask_yesno "Continuar mesmo assim?"; then
-                    success "✓ Token Telegram recebido (formato não validado)"
-                else
-                    TELEGRAM_TOKEN=""
-                fi
             fi
         fi
     fi
@@ -246,6 +230,8 @@ LLM_CHOICE=$(ask "Digite o número da opção (1-6): ")
 LLM_CHOICE=$(echo "$LLM_CHOICE" | tr -d '[:space:]')
 
 case $LLM_CHOICE in
+    if [ -z "$LLM_CHOICE" ] || ! [[ "$LLM_CHOICE" =~ ^[1-6]$ ]]; then LLM_CHOICE=1; fi
+    # Fallback: se vazio ou inválido, usa DeepSeek
     1)
         LLM_PROVIDER="deepseek"
         DEEPSEEK_API_KEY=$(ask "Digite sua API Key do DeepSeek: ")
