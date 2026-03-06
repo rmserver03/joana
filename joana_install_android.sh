@@ -204,7 +204,7 @@ while [ -z "$TELEGRAM_TOKEN" ]; do
         if [[ "$TELEGRAM_TOKEN" =~ ^[0-9]+:[A-Za-z0-9_-]+$ ]]; then
             success "✓ Token Telegram recebido e validado"
         else
-            warning "Formato do token parece inválido (deve ser números:letras)"
+            warning "Formato do token parece inválido (deve ser números:letras/números/hífen/underscore, ex: 123456:ABCdef123-_)"
             if ask_yesno "Continuar mesmo assim?"; then
                 success "✓ Token Telegram recebido (formato não validado)"
             else
@@ -225,7 +225,7 @@ fi
 echo ""
 info "CONFIGURAÇÃO DA API DE INTELIGÊNCIA ARTIFICIAL"
 echo "Escolha seu provedor de LLM:"
-echo "1. DeepSeek (recomendado, gratuito)"
+echo "1. DeepSeek (recomendado, custo por token)"
 echo "2. OpenAI (pago)"
 echo "3. Anthropic Claude (pago)"
 echo "4. Local (Ollama, LM Studio)"
@@ -233,9 +233,11 @@ echo "5. Cloud (qualquer API compatível com OpenAI)"
 echo "6. Pular configuração por agora"
 echo ""
 
-LLM_PROVIDER=$(ask "Digite o número da opção (1-6): ")
+LLM_CHOICE=$(ask "Digite o número da opção (1-6): ")
+# Remove espaços e newlines
+LLM_CHOICE=$(echo "$LLM_CHOICE" | tr -d '[:space:]')
 
-case $LLM_PROVIDER in
+case $LLM_CHOICE in
     1)
         LLM_PROVIDER="deepseek"
         DEEPSEEK_API_KEY=$(ask "Digite sua API Key do DeepSeek: ")
@@ -289,7 +291,7 @@ case $LLM_PROVIDER in
         ;;
     *)
         LLM_PROVIDER="deepseek"
-        warning "Opção inválida, usando DeepSeek como padrão"
+        warning "Opção inválida '$LLM_CHOICE', usando DeepSeek como padrão"
         DEEPSEEK_API_KEY=$(ask "Digite sua API Key do DeepSeek: ")
         if [ -n "$DEEPSEEK_API_KEY" ]; then
             success "✓ API Key do DeepSeek recebida"
